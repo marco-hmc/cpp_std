@@ -1,5 +1,5 @@
 ## 迭代器
-![alt text](imgs/4_iterator_image.png)
+![alt text](imgs/iterator_image.png)
 
 ### 1. concepts
 #### 1.1 迭代器有哪些？
@@ -155,6 +155,48 @@ int main() {
 3. **优化**：通过迭代器 traits，可以在编译时了解迭代器的特性，从而进行相应的优化。例如，对于随机访问迭代器，可以使用更高效的算法。
 
 
+### 98. 习题
+    ```c++
+    #include <iostream>
+
+    class fibit {
+        size_t i{0};
+        size_t a{0};
+        size_t b{1};
+
+    public:
+        fibit() = default;
+        explicit fibit(size_t i_) : i{i_} {}
+
+        size_t operator*() const { return b; }
+        fibit &operator++() {
+            const size_t old_b{b};
+            b += a;
+            a = old_b;
+            ++i;
+            return *this;
+        }
+        bool operator!=(const fibit &o) const { return i != o.i; }
+    };
+
+    class fib_range {
+        size_t end_n;
+
+    public:
+        fib_range(size_t end_n_) : end_n{end_n_} {}
+        fibit begin() const { return fibit{}; }
+        fibit end() const { return fibit{end_n}; }
+    };
+
+    int main() {
+        for (auto i : fib_range(10)) {
+            std::cout << i << ", ";
+        }
+        std::cout << '\n';
+    }
+    ```
+
+
 ### 99. quiz 
 
 #### 1. 什么叫只支持一次正向访问，和支持多次正向访问？
@@ -251,53 +293,7 @@ int main() {
     比如说`std::for_each`要求输入迭代器，但是给一个随机访问迭代器也行，因为随机访问迭代器的能力是输入迭代器的超集.
 
 
-### 99. 习题
-    ```c++
-    #include <iostream>
-
-    class fibit {
-        size_t i{0};
-        size_t a{0};
-        size_t b{1};
-
-    public:
-        fibit() = default;
-        explicit fibit(size_t i_) : i{i_} {}
-
-        size_t operator*() const { return b; }
-        fibit &operator++() {
-            const size_t old_b{b};
-            b += a;
-            a = old_b;
-            ++i;
-            return *this;
-        }
-        bool operator!=(const fibit &o) const { return i != o.i; }
-    };
-
-    class fib_range {
-        size_t end_n;
-
-    public:
-        fib_range(size_t end_n_) : end_n{end_n_} {}
-        fibit begin() const { return fibit{}; }
-        fibit end() const { return fibit{end_n}; }
-    };
-
-    int main() {
-        for (auto i : fib_range(10)) {
-            std::cout << i << ", ";
-        }
-        std::cout << '\n';
-    }
-    ```
-
-#### 1. 迭代器失效
-所谓的迭代器失效，是指取出迭代器之后，经过某些和这个迭代器不直接相关的操作，如新增元素，会导致原来的迭代器失效。是这个意思吗？常见的迭代器失效有哪些？
-
-你对迭代器失效的理解基本正确。迭代器失效指的是在获取迭代器之后，由于对容器进行了某些操作，使得迭代器指向的元素不再有效，或者迭代器的行为变得不可预测。下面将从不同容器类型介绍常见的迭代器失效情况。
-
-### 1. `std::vector` 和 `std::string`
+#### 5. `std::vector` 和 `std::string`迭代器失效
 这两种容器在内存中是连续存储的。当进行插入、删除等操作时，可能会导致内存重新分配，从而使原有的迭代器失效。
 - **插入元素**：如果插入元素时，容器的容量不足以容纳新元素，会重新分配一块更大的内存空间，并将原有的元素复制到新的内存中，原有的迭代器就会失效。
 ```cpp
@@ -328,7 +324,7 @@ int main() {
 }
 ```
 
-### 2. `std::list`、`std::set`、`std::map` 等
+#### 6. `std::list`、`std::set`、`std::map` 等迭代器失效
 这些容器的元素在内存中不是连续存储的。插入操作通常不会使迭代器失效，但删除操作会使指向被删除元素的迭代器失效。
 - **插入元素**：插入操作不会使迭代器失效。
 ```cpp
@@ -358,7 +354,7 @@ int main() {
 }
 ```
 
-### 避免迭代器失效的方法
+#### 7. 避免迭代器失效的方法迭代器失效
 - 插入元素后，重新获取迭代器。
 - 删除元素时，使用 `erase` 方法的返回值更新迭代器。
 ```cpp
@@ -378,4 +374,4 @@ int main() {
 }
 ```
 
-总之，在使用迭代器时，要特别注意容器的操作是否会导致迭代器失效，并采取相应的措施来避免未定义行为。 
+
