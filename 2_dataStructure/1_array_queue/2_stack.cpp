@@ -1,3 +1,5 @@
+算法有家问了个记录栈的最大值没答上来，有家问的两个栈组成一个队列
+
 #include <iostream>
 #include <vector>
 

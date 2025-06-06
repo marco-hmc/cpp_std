@@ -1,3 +1,93 @@
+#排序
+
+## [最大数](https://leetcode-cn.com/problems/largest-number/)
+
+- 思路
+
+  - 要想组成最大的整数，**一种直观的想法是把数值大的数放在高位**。于是我们**可以比较输入数组的每个元素的最高位，最高位相同的时候比较次高位，以此类推，完成排序，然后把它们拼接起来**。这种排序方式对于输入数组 没有相同数字开头的时候是有效的
+
+  <img src="imgs/algorithm/max_num.jpg" alt="max_num" style="zoom: 80%;" />
+
+- 代码实现
+
+  ```c++
+  string largestNumber(vector<int>& nums) {
+    //
+    auto comp = [](int &x, int &y) -> bool {
+        long sx = 10, sy = 10;
+        while (sx <= x) {
+            sx *= 10;
+        }
+        while (sy <= y) {
+            sy *= 10;
+        }
+        return x * sy + y > y * sx + x;
+    };
+
+    sort(nums.begin(), nums.end(), comp);
+    if (nums[0] == 0) {
+        return "0";
+    }
+    string ret;
+    for (auto &num : nums) {
+        ret += to_string(num);
+    }
+    return ret;
+  }
+  ```
+
+## 数组中的逆序对
+
+- 题目描述
+
+  - 在数组中的两个数字，如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。输入一个数组,求出这个数组中的逆序对的总数 P。并将 P 对 1000000007 取模的结果输出。 即输出 P%1000000007
+
+- 解题思路
+
+  - 利用归并排序，自底向上归并过程，如果出现待归并左子数组中 left 下标数字大于右子数组中 right 下标数字，由于左右数组都是正序，则左子数组 left 右边的数都与 right 所指的数组成逆序对，逆序对总数增加 mid-left+1 对
+
+- 代码实现
+
+  ```c++
+  class Solution {
+  public:
+    int count = 0;
+    int InversePairs(vector<int> data) {
+        if (data.empty()) return 0;
+        vector<int> tmp(data);
+        division(data, tmp, 0, data.size() - 1);
+        return count;
+    }
+
+    void division(vector<int> & array, vector<int> & tmp, int left, int right) {
+        if (left >= right) {
+            return;
+        }
+        int mid = left + (right - left) / 2;
+
+        division(array, tmp, left, mid);
+        division(array, tmp, mid + 1, right);
+
+        int idx = left, rightIdx = mid + 1, leftIdx = left;
+        // merge
+        while (leftIdx <= mid && rightIdx <= right) {
+            if (array[leftIdx] <= array[rightIdx]) {
+                tmp[idx++] = array[leftIdx++];
+            } else {
+                // 逆序，则由于array[left...mid]已经是正序，
+                // left右边都与array[right]组成逆序对
+                count += mid - leftIdx + 1;
+                count %= 1000000007;
+                tmp[idx++] = array[rightIdx++];
+            }
+        }
+        while (leftIdx <= mid) tmp[idx++] = array[leftIdx++];
+        while (rightIdx <= right) tmp[idx++] = array[rightIdx++];
+        for (int i = left; i <= right; ++i) array[i] = tmp[i];
+    }
+  };
+  ```
+
 #include <iostream>
 #include <vector>
 
@@ -252,4 +342,5 @@ namespace BuckerSort {
 
 }  // namespace BuckerSort
 
-int main() { return 0; }
+int main() {
+    return 0; }

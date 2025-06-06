@@ -1,12 +1,23 @@
+6、排序
+
+```c++ struct Adltem {
+    std::string ad_id;
+    int priority;
+    int score
+};
+```
+
+    实现一个函数，按照如下规则排序按照 priority 升序排列如果 priority
+        一样大，则按照 score 降序排列如果 priority 一样，则随机排序
 #include <cassert>
 #include <iostream>
 #include <queue>
 #include <vector>
 
-// 1. priority_queue如何自定义比较函数
-// 2. priority_queue如何构造
+    // 1. priority_queue如何自定义比较函数
+    // 2. priority_queue如何构造
 
-namespace priority_queue {
+    namespace priority_queue {
     void task() {
         using item_type = std::pair<int, std::string>;
         std::priority_queue<item_type> q;
