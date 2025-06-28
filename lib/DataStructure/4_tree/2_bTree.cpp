@@ -141,17 +141,17 @@ void BTree::traverse() {
 void test() {
     BTree bTree(3);
 
-  bTree.insert(10);
-  bTree.insert(20);
-  bTree.insert(5);
-  bTree.insert(6);
-  bTree.insert(12);
-  bTree.insert(30);
-  bTree.insert(7);
-  bTree.insert(17);
+    bTree.insert(10);
+    bTree.insert(20);
+    bTree.insert(5);
+    bTree.insert(6);
+    bTree.insert(12);
+    bTree.insert(30);
+    bTree.insert(7);
+    bTree.insert(17);
 
-  std::cout << "B树遍历结果:";
-  bTree.traverse();
+    std::cout << "B树遍历结果:";
+    bTree.traverse();
 }
 
 int main() {
