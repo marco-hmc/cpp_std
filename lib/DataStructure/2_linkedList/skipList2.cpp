@@ -166,3 +166,8 @@ int main() {
 
     return 0;
 }
+
+/*
+100个节点
+min(logx100) x=e// 2.7
+*/

@@ -166,20 +166,3 @@ std::shared_ptr<FILE> smartFile(fopen("file.txt", "r"), [](FILE* ptr){
 ```
 
 在这个例子里，当 `std::shared_ptr` 管理的文件资源不再被引用时，会调用自定义的 lambda 表达式释放器来关闭文件。
-
-### 99. quiz
-
-#### 1. 智能指针如何变为常量形式的？
-
-```cpp
-struct MyClass {
-    int value;
-};
-
-std::shared_ptr<const MyClass> ptr = std::make_shared<MyClass>();
-
-// compile fail
-// ptr->value = 42;
-```
-
-#### 2. 为什么`std::unique_ptr`的删除器和`std::shared_ptr`的删除器不一样？
