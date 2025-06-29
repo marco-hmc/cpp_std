@@ -37,9 +37,9 @@ class MyCircularQueue {
         return queue[tail];
     }
 
-    bool isEmpty() { return (head == -1 && tail == -1); }
+    bool isEmpty() const { return (head == -1 && tail == -1); }
 
-    bool isFull() { return ((tail + 1) % size == head); }
+    bool isFull() const { return ((tail + 1) % size == head); }
 
   private:
     std::vector<int> queue;
