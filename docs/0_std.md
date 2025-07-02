@@ -19,12 +19,12 @@ STL，全称 Standard Template Library（标准模板库），是 C++标准库�
 5. `适配器（Adapters）`：如 stack、queue、priority_queue 等，它们是在其他容器的基础上，提供了不同的接口。
 6. `分配器（Allocators）`：用于控制 STL 容器的内存分配。
 
-| 容器 | 数据结构 | 访问复杂度 | 插入/删除复杂度 | 核心特性 |
-| --- | --- | --- | --- | --- |
-| `vector` | 动态数组 | O(1) | 尾部 O(1)，其他 O(n) | 内存连续，随机访问快 |
-| `deque` | 分块双向队列 | O(1) | 头尾 O(1)，其他 O(n) | 多块内存非连续，支持高效双端扩展 |
-| `list` | 双向链表 | O(n) | O(1) | 任意位置插入删除快，无缓存局部性 |
-| `forward_list` | 单向链表 | O(n) | O(1) | 最小化内存开销，仅支持前向遍历 |
+| 容器           | 数据结构     | 访问复杂度 | 插入/删除复杂度      | 核心特性                         |
+| -------------- | ------------ | ---------- | -------------------- | -------------------------------- |
+| `vector`       | 动态数组     | O(1)       | 尾部 O(1)，其他 O(n) | 内存连续，随机访问快             |
+| `deque`        | 分块双向队列 | O(1)       | 头尾 O(1)，其他 O(n) | 多块内存非连续，支持高效双端扩展 |
+| `list`         | 双向链表     | O(n)       | O(1)                 | 任意位置插入删除快，无缓存局部性 |
+| `forward_list` | 单向链表     | O(n)       | O(1)                 | 最小化内存开销，仅支持前向遍历   |
 
 | 容器           | 数据结构 | 有序性 | 键唯一性 | 操作复杂度 |
 | -------------- | -------- | ------ | -------- | ---------- |
@@ -32,11 +32,11 @@ STL，全称 Standard Template Library（标准模板库），是 C++标准库�
 | `map/multimap` | 红黑树   | 是     | 是/否    | O(log n)   |
 | `unordered_*`  | 哈希表   | 否     | 是/否    | 平均 O(1)  |
 
-| 适配器 | 底层容器 | 操作限制 | 典型应用场景 |
-| --- | --- | --- | --- |
-| `stack` | deque/list | LIFO（仅顶端操作） | 函数调用栈、撤销操作 |
-| `queue` | deque/list | FIFO（两端操作） | 任务队列、BFS 算法 |
-| `priority_queue` | vector | 按优先级出队（堆结构） | 调度系统、Dijkstra 算法 |
+| 适配器           | 底层容器   | 操作限制               | 典型应用场景            |
+| ---------------- | ---------- | ---------------------- | ----------------------- |
+| `stack`          | deque/list | LIFO（仅顶端操作）     | 函数调用栈、撤销操作    |
+| `queue`          | deque/list | FIFO（两端操作）       | 任务队列、BFS 算法      |
+| `priority_queue` | vector     | 按优先级出队（堆结构） | 调度系统、Dijkstra 算法 |
 
 ### 1. 容器类
 
@@ -101,9 +101,9 @@ table.insert({"FOO", 42});  // 插入失败，值仍为24
 
 - **原理**：`insert()` 方法检测到键已存在时，保留原值并返回插入失败的迭代器。
 
-| 方法 | 特性 |
-| --- | --- |
-| `operator[]` | 若键不存在则插入默认值，存在时直接覆盖值 |
+| 方法               | 特性                                                                  |
+| ------------------ | --------------------------------------------------------------------- |
+| `operator[]`       | 若键不存在则插入默认值，存在时直接覆盖值                              |
 | `insert_or_assign` | (C++17+) 显式语义，无论键是否存在都会执行插入或覆盖，避免隐式构造损耗 |
 
 ```cpp
@@ -240,3 +240,50 @@ std::shared_ptr<const MyClass> ptr = std::make_shared<MyClass>();
 ```
 
 #### 3.3 为什么`std::unique_ptr`的删除器和`std::shared_ptr`的删除器不一样？
+
+`shared_ptr`的核心特性是**共享所有权**，其实现必须维护一个共享内存块（用于存储引用计数）。由于该内存块本身已引入了额外开销（相比原始指针），因此**添加类型擦除的删除器不会显著增加负担**。具体原因如下：
+
+- **共享内存块的必要性**：无论是否自定义删除器，`shared_ptr`都需要一块共享内存来存储引用计数、弱引用计数等信息。
+- **删除器的存储方式**：类型擦除的删除器（通过函数对象或 lambda 表达式实现）可以存储在该共享内存块中，与引用计数等数据共同管理，避免为每个`shared_ptr`实例单独分配空间。
+- **开销权衡**：由于`shared_ptr`本身定位为“有开销的智能指针”，其设计更注重灵活性（如支持不同类型的删除器），而非极致性能。
+
+`unique_ptr`的设计目标是**无额外开销**，并保证唯一所有权。为实现这一点，其删除器必须作为类型的一部分嵌入实例中，原因如下：
+
+- **零开销原则**：`unique_ptr`旨在接近原始指针的性能，因此避免任何额外的动态内存分配或共享数据结构。
+- **删除器的存储方式**：每个`unique_ptr`实例直接包含删除器的代码或状态（如函数指针、lambda 捕获的变量），使其成为类型的一部分（例如`unique_ptr<T, Deleter>`中的`Deleter`类型）。
+- **类型安全与性能优化**：将删除器嵌入类型后，编译器可以在编译期确定删除逻辑，避免运行时的间接调用（如虚函数或函数指针），从而优化性能。
+
+| **特性**         | **shared_ptr**                          | **unique_ptr**                               |
+| ---------------- | --------------------------------------- | -------------------------------------------- |
+| **所有权类型**   | 共享所有权                              | 唯一所有权                                   |
+| **删除器存储**   | 类型擦除，存储在共享内存块中            | 嵌入实例，作为类型的一部分                   |
+| **开销**         | 有固定开销（引用计数、共享内存）        | 理论上零开销（接近原始指针）                 |
+| **设计目标**     | 灵活性（支持多种删除器、共享资源）      | 性能优化（无额外开销、唯一控制）             |
+| **类型参数示例** | `shared_ptr<T>`（删除器可隐式类型擦除） | `unique_ptr<T, Deleter>`（删除器为显式类型） |
+
+**示例代码：**
+
+```cpp
+// shared_ptr使用类型擦除删除器（无需显式指定类型）
+std::shared_ptr<int> sp1(new int(10), [](int* p) {
+    std::cout << "Custom deleter for shared_ptr" << std::endl;
+    delete p;
+});
+
+// unique_ptr必须将删除器作为类型参数
+struct MyDeleter {
+    void operator()(int* p) {
+        std::cout << "Custom deleter for unique_ptr" << std::endl;
+        delete p;
+    }
+};
+std::unique_ptr<int, MyDeleter> up1(new int(20));
+
+// 或使用lambda时通过std::function包装（但会引入额外开销）
+std::unique_ptr<int, std::function<void(int*)>> up2(
+    new int(30),
+    [](int* p) { std::cout << "Lambda deleter for unique_ptr" << std::endl; delete p; }
+);
+```
+
+By binding the deleter at compile time, unique_ptr avoids the run-time cost of an indirect call to its deleter. By binding the deleter at run time, shared_ptr makes it easier for users to override the deleter.

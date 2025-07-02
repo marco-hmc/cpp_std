@@ -1,3 +1,4 @@
+#include <cstring>
 #include <iostream>
 
 class BTreeNode {
@@ -9,6 +10,7 @@ class BTreeNode {
 
   public:
     BTreeNode(int t, bool leaf);
+    ~BTreeNode();
 
     void insertNonFull(int k);
     void splitChild(int i, BTreeNode *y);
@@ -23,17 +25,29 @@ class BTree {
 
   public:
     BTree(int t);
+    ~BTree();
 
     void insert(int k);
     void traverse();
+
+  private:
+    void destroyTree(BTreeNode *node);
 };
 
 BTreeNode::BTreeNode(int t, bool leaf)
     : keys(new int[2 * t - 1]),
       t(t),
-      children(new BTreeNode *[2 * t]),
+      children(new BTreeNode *[2 * t]()),
       numKeys(0),
       leaf(leaf) {}
+
+BTreeNode::~BTreeNode() {
+    for (int i = 0; i <= numKeys; ++i) {
+        delete children[i];
+    }
+    delete[] keys;
+    delete[] children;
+}
 
 void BTreeNode::insertNonFull(int k) {
     int i = numKeys - 1;
@@ -108,6 +122,12 @@ void BTreeNode::traverse() {
 
 BTree::BTree(int t) : root(nullptr), t(t) {}
 
+BTree::~BTree() { destroyTree(root); }
+
+void BTree::destroyTree(BTreeNode *node) {
+    delete node;  // BTreeNode::~BTreeNode will handle recursive delete
+}
+
 void BTree::insert(int k) {
     if (root == nullptr) {
         root = new BTreeNode(t, true);
@@ -152,6 +172,7 @@ void test() {
 
     std::cout << "B树遍历结果:";
     bTree.traverse();
+    std::cout << std::endl;
 }
 
 int main() {
