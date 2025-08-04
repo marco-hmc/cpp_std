@@ -6,10 +6,8 @@
 
 class Variant {
   public:
-    // 枚举类型，用于表示存储的数据类型
     enum class Type { INT, FLOAT, STRING, VECTOR_INT, ARRAY_INT_5 };
 
-    // 构造函数模板，用于存储不同类型的数据
     template <typename T>
     Variant(T value) {
         using U = std::decay_t<T>;
@@ -33,16 +31,12 @@ class Variant {
         }
     }
 
-    // 析构函数
     ~Variant() { destroy(); }
 
-    // 拷贝构造函数
     Variant(const Variant& other) { copyFrom(other); }
 
-    // 移动构造函数
     Variant(Variant&& other) noexcept { moveFrom(std::move(other)); }
 
-    // 拷贝赋值运算符
     Variant& operator=(const Variant& other) {
         if (this != &other) {
             destroy();
@@ -51,7 +45,6 @@ class Variant {
         return *this;
     }
 
-    // 移动赋值运算符
     Variant& operator=(Variant&& other) noexcept {
         if (this != &other) {
             destroy();
@@ -60,10 +53,8 @@ class Variant {
         return *this;
     }
 
-    // 获取存储的数据类型
     Type getType() const { return type; }
 
-    // 获取存储的数据
     template <typename T>
     T get() const {
         using U = std::decay_t<T>;
@@ -162,7 +153,7 @@ class Variant {
                     std::array<int, 5>(std::move(other.data.arrayInt5Value));
                 break;
         }
-        other.type = Type::INT;  // Reset other to a valid state
+        other.type = Type::INT;
     }
 };
 
@@ -198,7 +189,7 @@ int main() {
     Variant var = 42;
     printVariant(var);
 
-    var = 3.14f;
+    var = 3.14F;
     printVariant(var);
 
     var = std::string("Hello, world!");

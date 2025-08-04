@@ -2,6 +2,14 @@
 #include <iostream>
 #include <vector>
 
+namespace STD_USAGE {
+    void task() {}
+}  // namespace STD_USAGE
+
+namespace MY_IMPL {
+    void task() {}
+}  // namespace MY_IMPL
+
 int square(int x) {
     return x * x;
 }
