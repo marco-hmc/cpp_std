@@ -3,7 +3,7 @@ layout: post
 title: （一）STL那些事儿：STL的必知items
 categories: C++
 related_posts: True
-tags: C++ template
+tags: STL
 toc:
   sidebar: right
 ---

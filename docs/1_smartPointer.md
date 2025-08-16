@@ -1,3 +1,13 @@
+---
+layout: post
+title: （二）STL那些事儿：智能指针
+categories: C++
+related_posts: True
+tags: STL
+toc:
+  sidebar: right
+---
+
 ## 智能指针
 
 ### 1. concepts
