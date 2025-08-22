@@ -1,200 +1,463 @@
 #pragma once
 
-#include <iterator>
 #include <type_traits>
 #include <utility>
-
-#include "utils.h"
+#include <memory>
+#include <functional>
 
 namespace MyStd {
 
-    namespace ArrayImpl1 {
-
-        template <class _Tp, std::size_t _N>
-        struct Array {
-            using value_type = _Tp;
-            using size_type = std::size_t;
-            using difference_type = std::ptrdiff_t;
-            using pointer = _Tp *;
-            using const_pointer = _Tp const *;
-            using reference = _Tp &;
-            using const_reference = _Tp const &;
-            using iterator = _Tp *;
-            using const_iterator = _Tp const *;
-            using reverse_iterator = std::reverse_iterator<_Tp *>;
-            using const_reverse_iterator = std::reverse_iterator<_Tp const *>;
-
-            _Tp _M_elements[_N];
-
-            _Tp &operator[](size_t __i) noexcept { return _M_elements[__i]; }
-
-            _Tp const &operator[](size_t __i) const noexcept {
-                return _M_elements[__i];
-            }
-
-            _Tp &at(size_t __i) {
-                if (__i >= _N) [[__unlikely__]]
-                    throw std::out_of_range("array::at");
-                return _M_elements[__i];
-            }
-
-            _Tp const &at(size_t __i) const {
-                if (__i >= _N) [[__unlikely__]]
-                    throw std::out_of_range("array::at");
-                return _M_elements[__i];
-            }
-
-            void fill(_Tp const &__val) noexcept(
-                std::is_nothrow_copy_assignable_v<_Tp>) {
-                for (size_t __i = 0; __i < _N; __i++) {
-                    _M_elements[__i] = __val;
-                }
-            }
-
-            void swap(Array &__that) noexcept(
-                std::is_nothrow_swappable_v<_Tp>) {
-                for (size_t __i = 0; __i < _N; __i++) {
-                    std::swap(_M_elements[__i], __that._M_elements[__i]);
-                }
-            }
-
-            _Tp &front() noexcept { return _M_elements[0]; }
-
-            _Tp const &front() const noexcept { return _M_elements[0]; }
-
-            _Tp &back() noexcept { return _M_elements[_N - 1]; }
-
-            _Tp const &back() const noexcept { return _M_elements[_N - 1]; }
-
-            static constexpr bool empty() noexcept { return false; }
-
-            static constexpr std::size_t size() noexcept { return _N; }
-
-            static constexpr std::size_t max_size() noexcept { return _N; }
-
-            _Tp const *cdata() const noexcept { return _M_elements; }
-
-            _Tp const *data() const noexcept { return _M_elements; }
-
-            _Tp *data() noexcept { return _M_elements; }
-
-            _Tp const *cbegin() const noexcept { return _M_elements; }
-
-            _Tp const *cend() const noexcept { return _M_elements + _N; }
-
-            _Tp const *begin() const noexcept { return _M_elements; }
-
-            _Tp const *end() const noexcept { return _M_elements + _N; }
-
-            _Tp *begin() noexcept { return _M_elements; }
-
-            _Tp *end() noexcept { return _M_elements + _N; }
-
-            const_reverse_iterator crbegin() const noexcept {
-                return const_reverse_iterator(end());
-            }
-
-            const_reverse_iterator crend() const noexcept {
-                return const_reverse_iterator(begin());
-            }
-
-            const_reverse_iterator rbegin() const noexcept {
-                return const_reverse_iterator(end());
-            }
-
-            const_reverse_iterator rend() const noexcept {
-                return const_reverse_iterator(begin());
-            }
-
-            reverse_iterator rbegin() noexcept {
-                return reverse_iterator(end());
-            }
-
-            reverse_iterator rend() noexcept {
-                return reverse_iterator(begin());
-            }
-
-            _LIBPENGCXX_DEFINE_COMPARISON(Array);
-        };
-
-        template <class _Tp>
-        struct Array<_Tp, 0> {
-            using value_type = _Tp;
-            using pointer = _Tp *;
-            using const_pointer = _Tp const *;
-            using reference = _Tp &;
-            using const_reference = _Tp const &;
-            using iterator = _Tp *;
-            using const_iterator = _Tp const *;
-            using reverse_iterator = _Tp *;
-            using const_reverse_iterator = _Tp const *;
-
-            _Tp &operator[](size_t __i) noexcept { UNREACHABLE; }
-
-            _Tp const &operator[](size_t __i) const noexcept { UNREACHABLE; }
-
-            _Tp &at(size_t __i) { throw std::out_of_range("array::at"); }
-
-            _Tp const &at(size_t __i) const {
-                throw std::out_of_range("array::at");
-            }
-
-            void fill(_Tp const &) noexcept {}
-
-            void swap(Array &) noexcept {}
-
-            _Tp &front() noexcept { UNREACHABLE; }
-
-            _Tp const &front() const noexcept { UNREACHABLE; }
-
-            _Tp &back() noexcept { UNREACHABLE; }
-
-            _Tp const &back() const noexcept { UNREACHABLE; }
-
-            static constexpr bool empty() noexcept { return true; }
-
-            static constexpr size_t size() noexcept { return 0; }
-
-            static constexpr size_t max_size() noexcept { return 0; }
-
-            _Tp const *cdata() const noexcept { return nullptr; }
-
-            _Tp const *data() const noexcept { return nullptr; }
-
-            _Tp *data() noexcept { return nullptr; }
-
-            _Tp const *cbegin() const noexcept { return nullptr; }
-
-            _Tp const *cend() const noexcept { return nullptr; }
-
-            _Tp const *begin() const noexcept { return nullptr; }
-
-            _Tp const *end() const noexcept { return nullptr; }
-
-            _Tp *begin() noexcept { return nullptr; }
-
-            _Tp *end() noexcept { return nullptr; }
-
-            _Tp const *crbegin() const noexcept { return nullptr; }
-
-            _Tp const *crend() const noexcept { return nullptr; }
-
-            _Tp const *rbegin() const noexcept { return nullptr; }
-
-            _Tp const *rend() const noexcept { return nullptr; }
-
-            _Tp *rbegin() noexcept { return nullptr; }
-
-            _Tp *rend() noexcept { return nullptr; }
-
-            _LIBPENGCXX_DEFINE_COMPARISON(Array);
-        };
-
-        template <class _Tp, class... _Ts>
-        Array(_Tp, _Ts...)
-            -> Array<std::enable_if_t<(std::is_same_v<_Tp, _Ts> && ...), _Tp>,
-                     1 + sizeof...(_Ts)>;
-
-    }  // namespace ArrayImpl1
-
-}  // namespace MyStd
+// 默认删除器
+template <typename T>
+struct DefaultDelete {
+    constexpr DefaultDelete() noexcept = default;
+    
+    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
+    DefaultDelete(const DefaultDelete<U>&) noexcept {}
+    
+    void operator()(T* ptr) const noexcept {
+        static_assert(sizeof(T) > 0, "Cannot delete incomplete type");
+        delete ptr;
+    }
+};
+
+// 数组特化版本的默认删除器
+template <typename T>
+struct DefaultDelete<T[]> {
+    constexpr DefaultDelete() noexcept = default;
+    
+    template <typename U, typename = std::enable_if_t<std::is_convertible_v<U(*)[], T(*)[]>>>
+    DefaultDelete(const DefaultDelete<U[]>&) noexcept {}
+    
+    template <typename U>
+    std::enable_if_t<std::is_convertible_v<U(*)[], T(*)[]>>
+    operator()(U* ptr) const noexcept {
+        static_assert(sizeof(U) > 0, "Cannot delete incomplete type");
+        delete[] ptr;
+    }
+};
+
+// UniquePtr 主实现
+template <typename T, typename Deleter = DefaultDelete<T>>
+class UniquePtr {
+public:
+    using pointer = T*;
+    using element_type = T;
+    using deleter_type = Deleter;
+
+private:
+    pointer ptr_;
+    [[no_unique_address]] Deleter deleter_;
+
+public:
+    // 构造函数
+    constexpr UniquePtr() noexcept : ptr_(nullptr), deleter_() {
+        static_assert(!std::is_pointer_v<Deleter>, "Deleter cannot be a pointer type");
+    }
+    
+    constexpr UniquePtr(std::nullptr_t) noexcept : ptr_(nullptr), deleter_() {
+        static_assert(!std::is_pointer_v<Deleter>, "Deleter cannot be a pointer type");
+    }
+    
+    explicit UniquePtr(pointer ptr) noexcept : ptr_(ptr), deleter_() {
+        static_assert(!std::is_pointer_v<Deleter>, "Deleter cannot be a pointer type");
+    }
+    
+    UniquePtr(pointer ptr, const Deleter& deleter) noexcept
+        : ptr_(ptr), deleter_(deleter) {}
+    
+    UniquePtr(pointer ptr, std::remove_reference_t<Deleter>&& deleter) noexcept
+        : ptr_(ptr), deleter_(std::move(deleter)) {
+        static_assert(!std::is_reference_v<Deleter>, "Deleter cannot be an rvalue reference");
+    }
+    
+    // 移动构造函数
+    UniquePtr(UniquePtr&& other) noexcept
+        : ptr_(other.release()), deleter_(std::forward<Deleter>(other.deleter_)) {}
+    
+    // 类型转换移动构造函数
+    template <typename U, typename E,
+              typename = std::enable_if_t<
+                  std::is_convertible_v<typename UniquePtr<U, E>::pointer, pointer> &&
+                  !std::is_array_v<U> &&
+                  ((std::is_reference_v<Deleter> && std::is_same_v<E, Deleter>) ||
+                   (!std::is_reference_v<Deleter> && std::is_convertible_v<E, Deleter>))>>
+    UniquePtr(UniquePtr<U, E>&& other) noexcept
+        : ptr_(other.release()), deleter_(std::forward<E>(other.get_deleter())) {}
+    
+    // 禁止拷贝
+    UniquePtr(const UniquePtr&) = delete;
+    UniquePtr& operator=(const UniquePtr&) = delete;
+    
+    // 析构函数
+    ~UniquePtr() {
+        if (ptr_) {
+            deleter_(ptr_);
+        }
+    }
+    
+    // 移动赋值操作符
+    UniquePtr& operator=(UniquePtr&& other) noexcept {
+        if (this != &other) {
+            reset(other.release());
+            deleter_ = std::forward<Deleter>(other.deleter_);
+        }
+        return *this;
+    }
+    
+    template <typename U, typename E>
+    std::enable_if_t<
+        std::is_convertible_v<typename UniquePtr<U, E>::pointer, pointer> &&
+        std::is_assignable_v<Deleter&, E&&>,
+        UniquePtr&>
+    operator=(UniquePtr<U, E>&& other) noexcept {
+        reset(other.release());
+        deleter_ = std::forward<E>(other.deleter_);
+        return *this;
+    }
+    
+    UniquePtr& operator=(std::nullptr_t) noexcept {
+        reset();
+        return *this;
+    }
+    
+    // 访问操作符
+    pointer get() const noexcept {
+        return ptr_;
+    }
+    
+    deleter_type& get_deleter() noexcept {
+        return deleter_;
+    }
+    
+    const deleter_type& get_deleter() const noexcept {
+        return deleter_;
+    }
+    
+    explicit operator bool() const noexcept {
+        return ptr_ != nullptr;
+    }
+    
+    // 解引用操作符（非数组版本）
+    template <typename U = T>
+    std::enable_if_t<!std::is_array_v<U>, std::add_lvalue_reference_t<T>>
+    operator*() const noexcept(noexcept(*std::declval<pointer>())) {
+        return *ptr_;
+    }
+    
+    template <typename U = T>
+    std::enable_if_t<!std::is_array_v<U>, pointer>
+    operator->() const noexcept {
+        return ptr_;
+    }
+    
+    // 数组访问操作符（数组版本）
+    template <typename U = T>
+    std::enable_if_t<std::is_array_v<U>, std::add_lvalue_reference_t<element_type>>
+    operator[](std::size_t idx) const {
+        return ptr_[idx];
+    }
+    
+    // 修改操作
+    pointer release() noexcept {
+        pointer result = ptr_;
+        ptr_ = nullptr;
+        return result;
+    }
+    
+    void reset(pointer ptr = pointer{}) noexcept {
+        pointer old_ptr = ptr_;
+        ptr_ = ptr;
+        if (old_ptr) {
+            deleter_(old_ptr);
+        }
+    }
+    
+    void swap(UniquePtr& other) noexcept {
+        std::swap(ptr_, other.ptr_);
+        std::swap(deleter_, other.deleter_);
+    }
+    
+    // 比较操作符
+    template <typename U, typename E>
+    bool operator==(const UniquePtr<U, E>& other) const noexcept {
+        return ptr_ == other.get();
+    }
+    
+    template <typename U, typename E>
+    bool operator!=(const UniquePtr<U, E>& other) const noexcept {
+        return ptr_ != other.get();
+    }
+    
+    template <typename U, typename E>
+    bool operator<(const UniquePtr<U, E>& other) const noexcept {
+        return std::less<void*>{}(ptr_, other.get());
+    }
+    
+    template <typename U, typename E>
+    bool operator<=(const UniquePtr<U, E>& other) const noexcept {
+        return !(other < *this);
+    }
+    
+    template <typename U, typename E>
+    bool operator>(const UniquePtr<U, E>& other) const noexcept {
+        return other < *this;
+    }
+    
+    template <typename U, typename E>
+    bool operator>=(const UniquePtr<U, E>& other) const noexcept {
+        return !(*this < other);
+    }
+    
+    // 与 nullptr 的比较
+    bool operator==(std::nullptr_t) const noexcept {
+        return ptr_ == nullptr;
+    }
+    
+    bool operator!=(std::nullptr_t) const noexcept {
+        return ptr_ != nullptr;
+    }
+    
+    bool operator<(std::nullptr_t) const noexcept {
+        return std::less<pointer>{}(ptr_, nullptr);
+    }
+    
+    bool operator<=(std::nullptr_t) const noexcept {
+        return ptr_ == nullptr;
+    }
+    
+    bool operator>(std::nullptr_t) const noexcept {
+        return ptr_ != nullptr;
+    }
+    
+    bool operator>=(std::nullptr_t) const noexcept {
+        return true;
+    }
+};
+
+// 数组特化版本
+template <typename T, typename Deleter>
+class UniquePtr<T[], Deleter> {
+public:
+    using pointer = T*;
+    using element_type = T;
+    using deleter_type = Deleter;
+
+private:
+    pointer ptr_;
+    [[no_unique_address]] Deleter deleter_;
+
+public:
+    // 构造函数
+    constexpr UniquePtr() noexcept : ptr_(nullptr), deleter_() {}
+    constexpr UniquePtr(std::nullptr_t) noexcept : ptr_(nullptr), deleter_() {}
+    
+    template <typename U>
+    explicit UniquePtr(U ptr,
+                      std::enable_if_t<std::is_same_v<U, pointer> ||
+                                      (std::is_same_v<U, std::nullptr_t>) ||
+                                      (std::is_pointer_v<U> && 
+                                       std::is_same_v<std::remove_cv_t<std::remove_pointer_t<U>>, element_type>),
+                                      std::nullptr_t> = nullptr) noexcept
+        : ptr_(ptr), deleter_() {}
+    
+    template <typename U>
+    UniquePtr(U ptr, const Deleter& deleter,
+             std::enable_if_t<std::is_same_v<U, pointer> ||
+                             std::is_same_v<U, std::nullptr_t>, std::nullptr_t> = nullptr) noexcept
+        : ptr_(ptr), deleter_(deleter) {}
+    
+    template <typename U>
+    UniquePtr(U ptr, std::remove_reference_t<Deleter>&& deleter,
+             std::enable_if_t<std::is_same_v<U, pointer> ||
+                             std::is_same_v<U, std::nullptr_t>, std::nullptr_t> = nullptr) noexcept
+        : ptr_(ptr), deleter_(std::move(deleter)) {}
+    
+    // 移动构造函数
+    UniquePtr(UniquePtr&& other) noexcept
+        : ptr_(other.release()), deleter_(std::forward<Deleter>(other.deleter_)) {}
+    
+    template <typename U, typename E,
+              typename = std::enable_if_t<
+                  std::is_array_v<U> &&
+                  std::is_same_v<pointer, typename UniquePtr<U, E>::pointer> &&
+                  std::is_convertible_v<E, Deleter>>>
+    UniquePtr(UniquePtr<U, E>&& other) noexcept
+        : ptr_(other.release()), deleter_(std::forward<E>(other.get_deleter())) {}
+    
+    // 禁止拷贝
+    UniquePtr(const UniquePtr&) = delete;
+    UniquePtr& operator=(const UniquePtr&) = delete;
+    
+    // 析构函数
+    ~UniquePtr() {
+        if (ptr_) {
+            deleter_(ptr_);
+        }
+    }
+    
+    // 移动赋值操作符
+    UniquePtr& operator=(UniquePtr&& other) noexcept {
+        if (this != &other) {
+            reset(other.release());
+            deleter_ = std::forward<Deleter>(other.deleter_);
+        }
+        return *this;
+    }
+    
+    template <typename U, typename E>
+    std::enable_if_t<
+        std::is_array_v<U> &&
+        std::is_same_v<pointer, typename UniquePtr<U, E>::pointer> &&
+        std::is_assignable_v<Deleter&, E&&>,
+        UniquePtr&>
+    operator=(UniquePtr<U, E>&& other) noexcept {
+        reset(other.release());
+        deleter_ = std::forward<E>(other.deleter_);
+        return *this;
+    }
+    
+    UniquePtr& operator=(std::nullptr_t) noexcept {
+        reset();
+        return *this;
+    }
+    
+    // 访问操作符
+    pointer get() const noexcept {
+        return ptr_;
+    }
+    
+    deleter_type& get_deleter() noexcept {
+        return deleter_;
+    }
+    
+    const deleter_type& get_deleter() const noexcept {
+        return deleter_;
+    }
+    
+    explicit operator bool() const noexcept {
+        return ptr_ != nullptr;
+    }
+    
+    // 数组访问操作符
+    T& operator[](std::size_t idx) const {
+        return ptr_[idx];
+    }
+    
+    // 修改操作
+    pointer release() noexcept {
+        pointer result = ptr_;
+        ptr_ = nullptr;
+        return result;
+    }
+    
+    template <typename U>
+    std::enable_if_t<std::is_same_v<U, pointer> || std::is_same_v<U, std::nullptr_t>>
+    reset(U ptr = pointer{}) noexcept {
+        pointer old_ptr = ptr_;
+        ptr_ = ptr;
+        if (old_ptr) {
+            deleter_(old_ptr);
+        }
+    }
+    
+    void swap(UniquePtr& other) noexcept {
+        std::swap(ptr_, other.ptr_);
+        std::swap(deleter_, other.deleter_);
+    }
+    
+    // 比较操作符（与非数组版本相同）
+    template <typename U, typename E>
+    bool operator==(const UniquePtr<U, E>& other) const noexcept {
+        return ptr_ == other.get();
+    }
+    
+    template <typename U, typename E>
+    bool operator!=(const UniquePtr<U, E>& other) const noexcept {
+        return ptr_ != other.get();
+    }
+    
+    template <typename U, typename E>
+    bool operator<(const UniquePtr<U, E>& other) const noexcept {
+        return std::less<void*>{}(ptr_, other.get());
+    }
+    
+    bool operator==(std::nullptr_t) const noexcept {
+        return ptr_ == nullptr;
+    }
+    
+    bool operator!=(std::nullptr_t) const noexcept {
+        return ptr_ != nullptr;
+    }
+};
+
+// 工厂函数
+template <typename T, typename... Args>
+std::enable_if_t<!std::is_array_v<T>, UniquePtr<T>>
+make_unique(Args&&... args) {
+    return UniquePtr<T>(new T(std::forward<Args>(args)...));
+}
+
+template <typename T>
+std::enable_if_t<std::is_unbounded_array_v<T>, UniquePtr<T>>
+make_unique(std::size_t size) {
+    return UniquePtr<T>(new std::remove_extent_t<T>[size]());
+}
+
+template <typename T, typename... Args>
+std::enable_if_t<std::is_bounded_array_v<T>> make_unique(Args&&...) = delete;
+
+// make_unique_for_overwrite (C++20)
+template <typename T>
+std::enable_if_t<!std::is_array_v<T>, UniquePtr<T>>
+make_unique_for_overwrite() {
+    return UniquePtr<T>(new T);
+}
+
+template <typename T>
+std::enable_if_t<std::is_unbounded_array_v<T>, UniquePtr<T>>
+make_unique_for_overwrite(std::size_t size) {
+    return UniquePtr<T>(new std::remove_extent_t<T>[size]);
+}
+
+template <typename T, typename... Args>
+std::enable_if_t<std::is_bounded_array_v<T>> make_unique_for_overwrite(Args&&...) = delete;
+
+// 全局交换函数
+template <typename T, typename Deleter>
+void swap(UniquePtr<T, Deleter>& lhs, UniquePtr<T, Deleter>& rhs) noexcept {
+    lhs.swap(rhs);
+}
+
+// nullptr 比较的全局操作符
+template <typename T, typename Deleter>
+bool operator==(std::nullptr_t, const UniquePtr<T, Deleter>& ptr) noexcept {
+    return ptr == nullptr;
+}
+
+template <typename T, typename Deleter>
+bool operator!=(std::nullptr_t, const UniquePtr<T, Deleter>& ptr) noexcept {
+    return ptr != nullptr;
+}
+
+template <typename T, typename Deleter>
+bool operator<(std::nullptr_t, const UniquePtr<T, Deleter>& ptr) noexcept {
+    return std::less<typename UniquePtr<T, Deleter>::pointer>{}(nullptr, ptr.get());
+}
+
+template <typename T, typename Deleter>
+bool operator<=(std::nullptr_t, const UniquePtr<T, Deleter>& ptr) noexcept {
+    return nullptr == ptr.get();
+}
+
+template <typename T, typename Deleter>
+bool operator>(std::nullptr_t, const UniquePtr<T, Deleter>& ptr) noexcept {
+    return std::less<typename UniquePtr<T, Deleter>::pointer>{}(ptr.get(), nullptr);
+}
+
+template <typename T, typename Deleter>
+bool operator>=(std::nullptr_t, const UniquePtr<T, Deleter>& ptr) noexcept {
+    return !(nullptr < ptr);
+}
+
+} // namespace MyStd
