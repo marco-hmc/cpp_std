@@ -289,3 +289,5 @@ std::unique_ptr<int, std::function<void(int*)>> up2(
 ```
 
 By binding the deleter at compile time, unique_ptr avoids the run-time cost of an indirect call to its deleter. By binding the deleter at run time, shared_ptr makes it easier for users to override the deleter.
+
+#### 3.4 `std::vector<std::unique_ptr<int>> vec1`什么时候需要通过容器存指针？局限性和意义是什么？
